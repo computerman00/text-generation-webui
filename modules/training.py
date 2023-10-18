@@ -355,6 +355,23 @@ def do_train(lora_name: str, always_override: bool, q_proj_en: bool, v_proj_en: 
         target_mods = [f"{name}_proj" for name, enabled in available_modules.items() if enabled]
         return target_mods
 
+    # Populate target_modules list with chosen X_proj modules. Llama-based models only atm, non-llama will revert to default behavior.
+    def list_target_modules(model_id):
+        if model_id != "llama":
+            return model_to_lora_modules[model_id]
+
+        available_modules = {
+            "gate": gate_proj_en,
+            "down": down_proj_en,
+            "up": up_proj_en,
+            "q": q_proj_en,
+            "v": v_proj_en,
+            "k": k_proj_en,
+            "o": o_proj_en,
+        }
+        target_mods = [f"{name}_proj" for name, enabled in available_modules.items() if enabled]
+        return target_mods
+
     def encode(text, add_bos_token):
         result = shared.tokenizer.encode(text, truncation=True, max_length=cutoff_len)
         # Check if the first two tokens are BOS
